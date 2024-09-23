@@ -1,9 +1,5 @@
 package models
 
-type NutritionalValue interface {
-	NutritionalValueRelative | NutritionalValueAbsolute
-}
-
 
 // Nutritional value on 100 gramms of product
 type NutritionalValueRelative struct {
