@@ -10,13 +10,12 @@ type Meal struct {
 	EatingTime       time.Time
 	Ingridients      []Ingridient
 	NutritionalValue NutritionalValueAbsolute
-	Price            float64
-	Weight           float64
+	Price            float32
 }
 
 type Ingridient struct {
-	FoodStaff FoodStaff
-	Weight    float64
+	FoodProduct FoodProduct
+	Weight      float32
 }
 
 func (m *Meal) AddIngredient(ingredient Ingridient) {
@@ -33,7 +32,7 @@ func (m *Meal) RemoveIngredient(index int) error {
 	return nil
 }
 
-func (m *Meal) UpdateIngredientWeight(index int, newWeight float64) error {
+func (m *Meal) UpdateIngredientWeight(index int, newWeight float32) error {
 	if index < 0 || index >= len(m.Ingridients) {
 		return fmt.Errorf("invalid index")
 	}
@@ -43,29 +42,22 @@ func (m *Meal) UpdateIngredientWeight(index int, newWeight float64) error {
 }
 
 func (m *Meal) updateNutritionalValueAndWeight() {
-	var totalProteins, totalFats, totalCarbs, totalCalories, totalWeight float64
-
-	for _, ingredient := range m.Ingridients {
-		totalWeight += ingredient.Weight
-		totalProteins += ingredient.FoodStaff.NutritionalValueRelative.Proteins * (ingredient.Weight / 100)
-		totalFats += ingredient.FoodStaff.NutritionalValueRelative.Fats * (ingredient.Weight / 100)
-		totalCarbs += ingredient.FoodStaff.NutritionalValueRelative.Carbohydrates * (ingredient.Weight / 100)
-		totalCalories += ingredient.FoodStaff.NutritionalValueRelative.Calories * (ingredient.Weight / 100)
+	m.NutritionalValue = NutritionalValueAbsolute{
+		Proteins:      0,
+		Fats:          0,
+		Carbohydrates: 0,
+		Calories:      0,
 	}
 
-	m.Weight = totalWeight
-	m.NutritionalValue = NutritionalValueAbsolute{
-		Proteins:      totalProteins,
-		Fats:          totalFats,
-		Carbohydrates: totalCarbs,
-		Calories:      totalCalories,
+	for _, ingredient := range m.Ingridients {
+		m.NutritionalValue = m.NutritionalValue.AddRelativeValue(ingredient.FoodProduct.NutritionalValueRelative, ingredient.Weight / 100)
 	}
 }
 
-func (m *Meal) CalculateTotalPrice() float64 {
-	var totalPrice float64
+func (m *Meal) CalculateTotalPrice() float32 {
+	var totalPrice float32
 	for _, ingredient := range m.Ingridients {
-		totalPrice += ingredient.FoodStaff.PricePerKg * (ingredient.Weight / 1000)
+		totalPrice += ingredient.FoodProduct.PricePerPkg * (ingredient.Weight / ingredient.FoodProduct.WeightPerPkg)
 	}
 	m.Price = totalPrice
 	return totalPrice

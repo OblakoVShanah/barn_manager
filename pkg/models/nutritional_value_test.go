@@ -26,7 +26,7 @@ func TestNutritionalValueAbsolute_Add(t *testing.T) {
 		Calories:      450,
 	}
 
-	result := nv1.Add(nv2)
+	result := nv1.AddAbsoluteValue(nv2)
 
 	// Check if the result matches the expected values
 	if result.Proteins != expected.Proteins {
