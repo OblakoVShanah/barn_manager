@@ -58,3 +58,37 @@ func (fp *FoodProduct) UpdateProductName(newName string) {
 	fp.Name = newName
 	fmt.Println("New name --", fp.Name)
 }
+
+// map example
+func MapExample() {
+	productMap := make(map[string]FoodProduct)
+
+	productMap["Milk"] = FoodProduct{
+		Name:            "Milk",
+		WeightPerPkg:    1000,
+		Amount:          1,
+		PricePerPkg:     98.50,
+		ExpirationDate:  time.Now().AddDate(0, 0, 5),
+		PresentInFridge: true,
+	}
+
+	productMap["Beer"] = FoodProduct{
+		Name:            "Beer",
+		WeightPerPkg:    500,
+		Amount:          1,
+		PricePerPkg:     float32(999),
+		ExpirationDate:  time.Now().AddDate(0, 1, 0),
+		PresentInFridge: true,
+	}
+
+	for key, value := range productMap {
+		fmt.Println("Key:", key, "Value:", value)
+	}
+
+	delete(productMap, "Milk")
+	fmt.Println("Milk deleted.")
+
+	for key, value := range productMap {
+		fmt.Println("Key:", key, "Value:", value)
+	}
+}
