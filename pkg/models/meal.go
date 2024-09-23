@@ -1,14 +1,14 @@
 package models
 
 import (
-	"fmt"
-	"time"
+  "fmt"
+  "time"
 )
 
 type Meal struct {
 	Id               string
 	EatingTime       time.Time
-	Ingridients      []Ingridient
+	IngridientMap    map[string]Ingridient // Using map instead of slice
 	NutritionalValue NutritionalValueAbsolute
 	Price            float32
 }
@@ -19,24 +19,41 @@ type Ingridient struct {
 }
 
 func (m *Meal) AddIngredient(ingredient Ingridient) {
-	m.Ingridients = append(m.Ingridients, ingredient)
+	// Initialize the map if it's nil
+	if m.IngridientMap == nil {
+	m.IngridientMap = make(map[string]Ingridient)
+	}
+
+	// Add or update the ingredient in the map
+	m.IngridientMap[ingredient.FoodProduct.Name] = ingredient
+
 	m.updateNutritionalValueAndWeight()
 }
 
-func (m *Meal) RemoveIngredient(index int) error {
-	if index < 0 || index >= len(m.Ingridients) {
-		return fmt.Errorf("invalid index")
+func (m *Meal) RemoveIngredient(name string) error {
+	// Check if ingredient exists
+	if _, exists := m.IngridientMap[name]; !exists {
+	return fmt.Errorf("ingredient not found")
 	}
-	m.Ingridients = append(m.Ingridients[:index], m.Ingridients[index+1:]...)
+
+	// Remove from map
+	delete(m.IngridientMap, name)
+
 	m.updateNutritionalValueAndWeight()
 	return nil
 }
 
-func (m *Meal) UpdateIngredientWeight(index int, newWeight float32) error {
-	if index < 0 || index >= len(m.Ingridients) {
-		return fmt.Errorf("invalid index")
+func (m *Meal) UpdateIngredientWeight(name string, newWeight float32) error {
+	// Lookup ingredient in map
+	ingredient, exists := m.IngridientMap[name]
+	if !exists {
+	return fmt.Errorf("ingredient not found")
 	}
-	m.Ingridients[index].Weight = newWeight
+
+	// Update weight in map
+	ingredient.Weight = newWeight
+	m.IngridientMap[name] = ingredient
+
 	m.updateNutritionalValueAndWeight()
 	return nil
 }
@@ -49,14 +66,14 @@ func (m *Meal) updateNutritionalValueAndWeight() {
 		Calories:      0,
 	}
 
-	for _, ingredient := range m.Ingridients {
+	for _, ingredient := range m.IngridientMap {
 		m.NutritionalValue = m.NutritionalValue.AddRelativeValue(ingredient.FoodProduct.NutritionalValueRelative, ingredient.Weight / 100)
 	}
 }
 
 func (m *Meal) CalculateTotalPrice() float32 {
 	var totalPrice float32
-	for _, ingredient := range m.Ingridients {
+	for _, ingredient := range m.IngridientMap {
 		totalPrice += ingredient.FoodProduct.PricePerPkg * (ingredient.Weight / ingredient.FoodProduct.WeightPerPkg)
 	}
 	m.Price = totalPrice
