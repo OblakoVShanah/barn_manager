@@ -6,16 +6,13 @@ import (
 )
 
 type FoodProduct struct {
-	Name            string
-	WeightPerPkg    int // in gramms
-	Amount          int
-	PricePerPkg     float32
-	ExpirationDate  time.Time
-	PresentInFridge bool
-	Proteins        int // per 100g
-	Fats            int // per 100g
-	Carbohydrates   int // per 100g
-	Calories        int // per 100g
+	Name                     string
+	WeightPerPkg             float32 // in gramms
+	Amount                   int
+	PricePerPkg              float32
+	ExpirationDate           time.Time
+	PresentInFridge          bool
+	NutritionalValueRelative NutritionalValueRelative
 }
 
 // compare an expiration date of a product with current date,
@@ -31,7 +28,7 @@ func (fp *FoodProduct) CheckExpirationDate() bool {
 }
 
 // change FoodProduct's weight per package
-func (fp *FoodProduct) UpdateProductWeight(newWeight int) {
+func (fp *FoodProduct) UpdateProductWeight(newWeight float32) {
 	fp.WeightPerPkg = newWeight
 	fmt.Println("New weight --", fp.WeightPerPkg)
 }

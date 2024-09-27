@@ -9,7 +9,7 @@ import (
 
 var testProduct = FoodProduct{
 	Name:            "Milk",
-	WeightPerPkg:    1000,
+	WeightPerPkg:    1000.00,
 	Amount:          1,
 	PricePerPkg:     98.50,
 	ExpirationDate:  time.Now().AddDate(0, 0, 5),
@@ -27,7 +27,7 @@ func TestUpdateProductWeight(t *testing.T) {
 	testProduct.UpdateProductWeight(930)
 
 	if testProduct.WeightPerPkg != 930 {
-		t.Errorf("expected weight 930, got %d", testProduct.WeightPerPkg)
+		t.Errorf("expected weight 930, got %f", testProduct.WeightPerPkg)
 	}
 }
 
