@@ -5,6 +5,7 @@ import (
 )
 
 func TestNutritionalValueAbsolute_Add(t *testing.T) {
+	t.Parallel()
 	nv1 := NutritionalValueAbsolute{
 		Proteins:      20,
 		Fats:          10,

@@ -17,6 +17,7 @@ var testProduct = FoodProduct{
 }
 
 func TestChechExpirationDate(t *testing.T) {
+	t.Parallel()
 	tmpBool := testProduct.CheckExpirationDate()
 	if tmpBool != true {
 		t.Errorf("expected expiration true, got %t", tmpBool)
@@ -24,6 +25,7 @@ func TestChechExpirationDate(t *testing.T) {
 }
 
 func TestUpdateProductWeight(t *testing.T) {
+	t.Parallel()
 	testProduct.UpdateProductWeight(930)
 
 	if testProduct.WeightPerPkg != 930 {
@@ -32,6 +34,7 @@ func TestUpdateProductWeight(t *testing.T) {
 }
 
 func TestUpdateProductAmount(t *testing.T) {
+	t.Parallel()
 	testProduct.UpdateProductAmount(2)
 
 	if testProduct.Amount != 2 {
@@ -52,6 +55,7 @@ func TestUpdateProductAmount(t *testing.T) {
 }
 
 func TestUpdateProductPrice(t *testing.T) {
+	t.Parallel()
 	testProduct.UpdateProductPrice(100.21)
 
 	if testProduct.PricePerPkg != 100.21 {
@@ -60,6 +64,7 @@ func TestUpdateProductPrice(t *testing.T) {
 }
 
 func TestUpdateProductName(t *testing.T) {
+	t.Parallel()
 	testProduct.UpdateProductName("CowMilk")
 
 	if testProduct.Name != "CowMilk" {

@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-func TestAddIngredient(t *testing.T) {
+func TestMeal_AddIngredient(t *testing.T) {
+	t.Parallel()
 	meal := Meal{
 		Id:            "1",
 		EatingTime:    time.Now(),
@@ -38,7 +39,8 @@ func TestAddIngredient(t *testing.T) {
 	}
 }
 
-func TestRemoveIngredient(t *testing.T) {
+func TestMeal_RemoveIngredient(t *testing.T) {
+	t.Parallel()
 	meal := Meal{
 		Id:         "1",
 		EatingTime: time.Now(),
@@ -74,7 +76,8 @@ func TestRemoveIngredient(t *testing.T) {
 	}
 }
 
-func TestCalculateTotalPrice(t *testing.T) {
+func TestMeal_CalculateTotalPrice(t *testing.T) {
+	t.Parallel()
 	meal := Meal{
 		Id:         "1",
 		EatingTime: time.Now(),
@@ -121,5 +124,34 @@ func TestCalculateTotalPrice(t *testing.T) {
 
 	if price != 48 { // 23 * (100/100) + 50 * (200/400) = 48
 		t.Errorf("expected price 48, got %f", price)
+	}
+}
+
+func TestMeal_updateNutritionalValueAndWeight(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		Id               string
+		EatingTime       time.Time
+		IngridientMap    map[string]Ingridient
+		NutritionalValue NutritionalValueAbsolute
+		Price            float32
+	}
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Meal{
+				Id:               tt.fields.Id,
+				EatingTime:       tt.fields.EatingTime,
+				IngridientMap:    tt.fields.IngridientMap,
+				NutritionalValue: tt.fields.NutritionalValue,
+				Price:            tt.fields.Price,
+			}
+			m.updateNutritionalValueAndWeight()
+		})
 	}
 }
