@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestFoodProduct_CheckExpirationDate(t *testing.T) {
+func TestFoodProduct_IsSpoiled(t *testing.T) {
 	tests := []struct {
 		name string
 		fp   *FoodProduct
@@ -21,7 +21,7 @@ func TestFoodProduct_CheckExpirationDate(t *testing.T) {
 				ExpirationDate:  time.Now().AddDate(0, 0, 5),
 				PresentInFridge: true,
 			},
-			true,
+			false,
 		},
 		{
 			"spoiled Milk",
@@ -33,12 +33,12 @@ func TestFoodProduct_CheckExpirationDate(t *testing.T) {
 				ExpirationDate:  time.Now().AddDate(0, 0, -1),
 				PresentInFridge: true,
 			},
-			false,
+			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.fp.CheckExpirationDate(); got != tt.want {
+			if got := tt.fp.IsSpoiled(); got != tt.want {
 				t.Errorf("FoodProduct.CheckExpirationDate() = %v, want %v", got, tt.want)
 			}
 		})
@@ -83,7 +83,7 @@ func TestFoodProduct_UpdateProductAmount(t *testing.T) {
 		inFridgeState bool
 	}{
 		{
-			"Milk",
+			"Milk1to2",
 			&FoodProduct{
 				Name:            "Milk",
 				WeightPerPkg:    1000,
@@ -96,7 +96,7 @@ func TestFoodProduct_UpdateProductAmount(t *testing.T) {
 			true,
 		},
 		{
-			"Milk",
+			"Milk1to0",
 			&FoodProduct{
 				Name:            "Milk",
 				WeightPerPkg:    1000,
@@ -167,7 +167,7 @@ func TestFoodProduct_UpdateProductName(t *testing.T) {
 				ExpirationDate:  time.Now().AddDate(0, 0, 5),
 				PresentInFridge: true,
 			},
-			"Liquid protein",
+			"Milk2",
 		},
 	}
 	for _, tt := range tests {
@@ -189,6 +189,59 @@ func TestMapExample(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			MapExample()
+		})
+	}
+}
+
+func TestFoodProduct_WillSpoilSoon(t *testing.T) {
+	tests := []struct {
+		name string
+		fp   *FoodProduct
+		want bool
+	}{
+		{
+			"norm Milk",
+			&FoodProduct{
+				Name:            "Milk",
+				WeightPerPkg:    1000,
+				Amount:          1,
+				PricePerPkg:     98.50,
+				ExpirationDate:  time.Now().AddDate(0, 0, 5),
+				PresentInFridge: true,
+			},
+			false,
+		},
+		{
+			"Milk almost spoiled",
+			&FoodProduct{
+				Name:            "Milk",
+				WeightPerPkg:    1000,
+				Amount:          1,
+				PricePerPkg:     98.50,
+				ExpirationDate:  time.Now().AddDate(0, 0, 1).Add(time.Hour * -1),
+				PresentInFridge: true,
+			},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.fp.WillSpoilSoon(); got != tt.want {
+				t.Errorf("FoodProduct.IsSpoilSoon() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSliceExample(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{"Slice tst"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			SliceExample()
 		})
 	}
 }

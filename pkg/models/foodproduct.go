@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"slices"
 	"time"
 )
 
@@ -16,15 +17,27 @@ type FoodProduct struct {
 }
 
 // compare an expiration date of a product with current date,
-// return false if expiration date < current date otherwise true
-func (fp *FoodProduct) CheckExpirationDate() bool {
+// return true if expiration date < current date otherwise false
+func (fp *FoodProduct) IsSpoiled() bool {
 	if fp.ExpirationDate.Unix() < time.Now().Unix() {
 		fmt.Println(fp.Name, "was rotten. The expiration date --", fp.ExpirationDate)
-		return false
+		return true
 	} else {
 		fmt.Println(fp.Name, "is fine. The expiration date --", fp.ExpirationDate)
+		return false
+	}
+}
+
+// compare an expiration date of a product with current date,
+// return true if expiration date is in a day from current date
+// otherwise false
+func (fp *FoodProduct) WillSpoilSoon() bool {
+	if fp.ExpirationDate.Unix() < time.Now().AddDate(0, 0, 1).Unix() {
+		fmt.Println(fp.Name, "will spoil soon. The expiration date --", fp.ExpirationDate)
 		return true
 	}
+	fmt.Println(fp.Name, "is fine. The expiration date --", fp.ExpirationDate)
+	return false
 }
 
 // change FoodProduct's weight per package
@@ -91,4 +104,74 @@ func MapExample() {
 	for key, value := range productMap {
 		fmt.Println("Key:", key, "Value:", value)
 	}
+}
+
+// slice examle
+func SliceExample() {
+	productSlice := []FoodProduct{
+		{
+			Name:            "Milk",
+			WeightPerPkg:    1000,
+			Amount:          1,
+			PricePerPkg:     98.50,
+			ExpirationDate:  time.Now().AddDate(0, 0, 5),
+			PresentInFridge: true,
+		},
+		{
+			Name:            "Egg",
+			WeightPerPkg:    100,
+			Amount:          5,
+			PricePerPkg:     9.99,
+			ExpirationDate:  time.Now().AddDate(0, 0, -5),
+			PresentInFridge: true,
+		},
+		{
+			Name:            "Tomato",
+			WeightPerPkg:    100,
+			Amount:          0,
+			PricePerPkg:     5.99,
+			ExpirationDate:  time.Now().AddDate(0, 0, 10),
+			PresentInFridge: false,
+		},
+		{
+			Name:            "Chicken",
+			WeightPerPkg:    500,
+			Amount:          1,
+			PricePerPkg:     19.99,
+			ExpirationDate:  time.Now().AddDate(0, 0, 1),
+			PresentInFridge: true,
+		},
+		{
+			Name:            "Cheese",
+			WeightPerPkg:    200,
+			Amount:          1,
+			PricePerPkg:     49.99,
+			ExpirationDate:  time.Now().AddDate(0, 0, 1),
+			PresentInFridge: true,
+		},
+	}
+
+	fmt.Println(productSlice)
+
+	index_to_delete := make([]int, 0, len(productSlice))
+	for i, v := range productSlice {
+		// goes through the slice and check each product
+		// if it is out or already rotten
+		if !v.PresentInFridge || v.IsSpoiled() {
+			index_to_delete = append(index_to_delete, i)
+			fmt.Printf("Product %v is rotten or out\n", v.Name)
+			continue
+		}
+		if v.WillSpoilSoon() {
+			fmt.Printf("Product %v should be eaten today, otherwise it will rot\n", v.Name)
+		}
+	}
+
+	for _, v := range index_to_delete {
+		// delete "bad" products
+		productSlice = slices.Delete(productSlice, v, v+1)
+	}
+
+	fmt.Println(productSlice)
+
 }
