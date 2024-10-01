@@ -1,8 +1,8 @@
 package models
 
 import (
-  "fmt"
-  "time"
+	"fmt"
+	"time"
 )
 
 type Meal struct {
@@ -15,13 +15,13 @@ type Meal struct {
 
 type Ingridient struct {
 	FoodProduct FoodProduct
-	Weight      float32
+	Weight      int
 }
 
 func (m *Meal) AddIngredient(ingredient Ingridient) {
 	// Initialize the map if it's nil
 	if m.IngridientMap == nil {
-	m.IngridientMap = make(map[string]Ingridient)
+		m.IngridientMap = make(map[string]Ingridient)
 	}
 
 	// Add or update the ingredient in the map
@@ -33,7 +33,7 @@ func (m *Meal) AddIngredient(ingredient Ingridient) {
 func (m *Meal) RemoveIngredient(name string) error {
 	// Check if ingredient exists
 	if _, exists := m.IngridientMap[name]; !exists {
-	return fmt.Errorf("ingredient not found")
+		return fmt.Errorf("ingredient not found")
 	}
 
 	// Remove from map
@@ -43,11 +43,11 @@ func (m *Meal) RemoveIngredient(name string) error {
 	return nil
 }
 
-func (m *Meal) UpdateIngredientWeight(name string, newWeight float32) error {
+func (m *Meal) UpdateIngredientWeight(name string, newWeight int) error {
 	// Lookup ingredient in map
 	ingredient, exists := m.IngridientMap[name]
 	if !exists {
-	return fmt.Errorf("ingredient not found")
+		return fmt.Errorf("ingredient not found")
 	}
 
 	// Update weight in map
@@ -67,14 +67,14 @@ func (m *Meal) updateNutritionalValueAndWeight() {
 	}
 
 	for _, ingredient := range m.IngridientMap {
-		m.NutritionalValue = m.NutritionalValue.AddRelativeValue(ingredient.FoodProduct.NutritionalValueRelative, ingredient.Weight / 100)
+		m.NutritionalValue = m.NutritionalValue.AddRelativeValue(ingredient.FoodProduct.NutritionalValueRelative, float32(ingredient.Weight)/100)
 	}
 }
 
 func (m *Meal) CalculateTotalPrice() float32 {
 	var totalPrice float32
 	for _, ingredient := range m.IngridientMap {
-		totalPrice += ingredient.FoodProduct.PricePerPkg * (ingredient.Weight / ingredient.FoodProduct.WeightPerPkg)
+		totalPrice += ingredient.FoodProduct.PricePerPkg * float32(ingredient.Weight) / float32(ingredient.FoodProduct.WeightPerPkg)
 	}
 	m.Price = totalPrice
 	return totalPrice
