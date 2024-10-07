@@ -1,4 +1,4 @@
 package models
 
-type GroceryOrder struct {
-}
+// type GroceryOrder struct {
+// }
