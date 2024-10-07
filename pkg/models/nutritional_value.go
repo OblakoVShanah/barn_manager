@@ -1,5 +1,14 @@
 package models
 
+import (
+	"errors"
+)
+
+var (
+	ErrWeightMustBeGreaterThanZero = errors.New("weight must be greater than zero")
+	ErrIncorrectNutritionalValue   = errors.New("Nutritional value is not correct")
+)
+
 // A NutritionalValueRelative represents a nutritional value per 100g of a product
 type NutritionalValueRelative struct {
 	Proteins      int `json:"proteins"`
@@ -28,12 +37,22 @@ func (nv_left NutritionalValueAbsolute) AddAbsoluteValue(nv_right NutritionalVal
 }
 
 // AddRelativeValue adds relative nutritional value multiplied by weight to existed NutritionalValueAbsolute and
-// returns new instance of NutritionalValueAbsolute.
-func (nv_left NutritionalValueAbsolute) AddRelativeValue(nv_right NutritionalValueRelative, weight_right float32) NutritionalValueAbsolute {
-	return NutritionalValueAbsolute{
-		Proteins:      nv_left.Proteins + int(float32(nv_right.Proteins)*weight_right),
-		Fats:          nv_left.Fats + int(float32(nv_right.Fats)*weight_right),
-		Carbohydrates: nv_left.Carbohydrates + int(float32(nv_right.Carbohydrates)*weight_right),
-		Calories:      nv_left.Calories + int(float32(nv_right.Calories)*weight_right),
+// returns new instance of NutritionalValueAbsolute and error in case of wrong weight.
+func (nv_left NutritionalValueAbsolute) AddRelativeValue(nv_right NutritionalValueRelative, weight_right int) (NutritionalValueAbsolute, error) {
+	if weight_right <= 0 {
+		return NutritionalValueAbsolute{}, ErrWeightMustBeGreaterThanZero
 	}
+	return NutritionalValueAbsolute{
+		Proteins:      nv_left.Proteins + int(nv_right.Proteins*weight_right/100),
+		Fats:          nv_left.Fats + int(nv_right.Fats*weight_right/100),
+		Carbohydrates: nv_left.Carbohydrates + int(nv_right.Carbohydrates*weight_right/100),
+		Calories:      nv_left.Calories + int(nv_right.Calories*weight_right/100),
+	}, nil
+}
+
+func ValidateNutritionalValueRelative(nv NutritionalValueRelative) error {
+	if nv.Proteins < 0 || nv.Fats < 0 || nv.Carbohydrates < 0 || nv.Calories < 0 {
+		return ErrIncorrectNutritionalValue
+	}
+	return nil
 }

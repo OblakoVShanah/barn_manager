@@ -8,7 +8,12 @@ import (
 	"time"
 )
 
-var ErrExpDateEmpty = errors.New("ExpirationDate is not specified")
+var (
+	ErrExpDateEmpty         = errors.New("ExpirationDate is not specified")
+	ErrNegativeAmount       = errors.New("ExpirationDate is not specified")
+	ErrNegativeWeightPerPkg = errors.New("ExpirationDate is not specified")
+	ErrNegativePricePerPkg  = errors.New("negative price")
+)
 
 // A FoodProduct is a data structure for groceries.
 // One instance of the structure corresponds to one type of food product,
@@ -21,6 +26,23 @@ type FoodProduct struct {
 	ExpirationDate           time.Time
 	PresentInFridge          bool
 	NutritionalValueRelative NutritionalValueRelative
+}
+
+func (fp *FoodProduct) ValidateFoodproduct() error {
+	if fp.WeightPerPkg <= 0 {
+		return ErrNegativeWeightPerPkg
+	}
+	if fp.Amount <= 0 {
+		return ErrNegativeAmount
+	}
+	if fp.PricePerPkg <= 0 {
+		return ErrNegativePricePerPkg
+	}
+	if error := ValidateNutritionalValueRelative(fp.NutritionalValueRelative); error != nil {
+		return error
+	}
+
+	return nil
 }
 
 // IsSpoiled reports whether an expiration date of a product < current date.

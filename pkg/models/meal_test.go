@@ -32,7 +32,10 @@ func TestMeal_AddIngredient(t *testing.T) {
 		Weight: 200,
 	}
 
-	meal.AddIngredient(ingredient)
+	err := meal.AddIngredient(ingredient)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
 
 	if len(meal.IngridientMap) != 1 {
 		t.Errorf("expected 1 ingredient, got %d", len(meal.IngridientMap))
@@ -125,38 +128,36 @@ func TestMeal_CalculateTotalPrice(t *testing.T) {
 		Price: 0,
 	}
 
-	price := meal.CalculateTotalPrice()
+	price, error := meal.CalculateTotalPrice()
+	if error != nil {
+		t.Errorf("unexpected error: %v", error)
+	}
 
 	if price != 48 { // 23 * (100/100) + 50 * (200/400) = 48
 		t.Errorf("expected price 48, got %f", price)
 	}
+
+	meal.IngridientMap["Fish"] = Ingridient{
+		FoodProduct: FoodProduct{
+			Name:            "Fish",
+			WeightPerPkg:    100,
+			Amount:          10,
+			PricePerPkg:     -1,
+			ExpirationDate:  time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			PresentInFridge: true,
+			NutritionalValueRelative: NutritionalValueRelative{
+				Proteins:      25,
+				Fats:          5,
+				Carbohydrates: 0,
+				Calories:      165,
+			},
+		},
+		Weight: 200,
+	}
+
+	_, error = meal.CalculateTotalPrice()
+	if error == nil {
+		t.Errorf("expected error: %v", ErrNegativePrice)
+	}
 }
 
-func TestMeal_updateNutritionalValueAndWeight(t *testing.T) {
-	t.Parallel()
-	type fields struct {
-		Id               string
-		EatingTime       time.Time
-		IngridientMap    map[string]Ingridient
-		NutritionalValue NutritionalValueAbsolute
-		Price            float32
-	}
-	tests := []struct {
-		name   string
-		fields fields
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &Meal{
-				Id:               tt.fields.Id,
-				EatingTime:       tt.fields.EatingTime,
-				IngridientMap:    tt.fields.IngridientMap,
-				NutritionalValue: tt.fields.NutritionalValue,
-				Price:            tt.fields.Price,
-			}
-			m.updateNutritionalValueAndWeight()
-		})
-	}
-}
