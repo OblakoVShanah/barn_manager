@@ -38,7 +38,7 @@ func TestFoodProduct_IsSpoiled(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.fp.IsSpoiled(); got != tt.want {
+			if got, _ := tt.fp.IsSpoiled(); got != tt.want {
 				t.Errorf("FoodProduct.CheckExpirationDate() = %v, want %v", got, tt.want)
 			}
 		})
@@ -50,7 +50,7 @@ func TestFoodProduct_UpdateProductWeight(t *testing.T) {
 	tests := []struct {
 		name      string
 		fp        *FoodProduct
-		newWeight int
+		newWeight uint
 	}{
 		{
 			"Milk",
@@ -226,7 +226,7 @@ func TestFoodProduct_WillSpoilSoon(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.fp.WillSpoilSoon(); got != tt.want {
+			if got, _ := tt.fp.WillSpoilSoon(); got != tt.want {
 				t.Errorf("FoodProduct.IsSpoilSoon() = %v, want %v", got, tt.want)
 			}
 		})
