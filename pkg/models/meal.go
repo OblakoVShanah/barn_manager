@@ -18,16 +18,20 @@ var (
 type Meal struct {
 	Id               string
 	EatingTime       time.Time
-	IngridientMap    map[string]Ingridient // Using map instead of slice
+	IngridientMap    map[string]Ingridient
 	NutritionalValue NutritionalValueAbsolute
 	Price            float32
 }
 
+// Ingridient - структура, представляющая собой конкретный ингредиент.
+// Она состоит из продукта (FoodProduct) и его веса (Weight).
 type Ingridient struct {
 	FoodProduct FoodProduct
 	Weight      int
 }
 
+// ValidateIngridient - валидирует ингредиент. Проверяет, чтобы вес был
+// неотрицательным, а продукт - корректным.
 func (ingredient *Ingridient) ValidateIngridient() error {
 	if ingredient.Weight < 0 {
 		return ErrNegativeWeight
@@ -39,6 +43,8 @@ func (ingredient *Ingridient) ValidateIngridient() error {
 	return nil
 }
 
+// AddIngredient - добавляет ингредиент в список ингредиентов Meal.
+// Если ингредиент с таким именем уже существует, то он будет обновлен.
 func (m *Meal) AddIngredient(ingredient Ingridient) error {
 	// Validate ingridient
 	if error := ingredient.ValidateIngridient(); error != nil {
@@ -57,6 +63,8 @@ func (m *Meal) AddIngredient(ingredient Ingridient) error {
 	return nil
 }
 
+// RemoveIngredient - удаляет ингредиент с заданным именем из списка
+// ингредиентов Meal.
 func (m *Meal) RemoveIngredient(name string) error {
 	// Check if ingredient exists
 	if _, exists := m.IngridientMap[name]; !exists {
@@ -70,6 +78,7 @@ func (m *Meal) RemoveIngredient(name string) error {
 	return nil
 }
 
+// UpdateIngredientWeight - обновляет вес ингредиента с заданным именем.
 func (m *Meal) UpdateIngredientWeight(name string, newWeight int) error {
 	// Lookup ingredient in map
 	ingredient, exists := m.IngridientMap[name]
@@ -89,6 +98,8 @@ func (m *Meal) UpdateIngredientWeight(name string, newWeight int) error {
 	return nil
 }
 
+// updateNutritionalValueAndWeight - обновляет общую калорийность и
+// общее количество белков, жиров и углеводов.
 func (m *Meal) updateNutritionalValueAndWeight() error {
 	m.NutritionalValue = NutritionalValueAbsolute{
 		Proteins:      0,
@@ -107,6 +118,7 @@ func (m *Meal) updateNutritionalValueAndWeight() error {
 	return nil
 }
 
+// CalculateTotalPrice - вычисляет общую стоимость блюда.
 func (m *Meal) CalculateTotalPrice() (float32, error) {
 	var totalPrice float32
 	for _, ingredient := range m.IngridientMap {
@@ -118,3 +130,4 @@ func (m *Meal) CalculateTotalPrice() (float32, error) {
 	m.Price = totalPrice
 	return totalPrice, nil
 }
+
