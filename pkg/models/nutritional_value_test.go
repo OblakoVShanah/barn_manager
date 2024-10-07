@@ -31,15 +31,15 @@ func TestNutritionalValueAbsolute_Add(t *testing.T) {
 
 	// Check if the result matches the expected values
 	if result.Proteins != expected.Proteins {
-		t.Errorf("expected %f Proteins, got %f", expected.Proteins, result.Proteins)
+		t.Errorf("expected %d Proteins, got %d", expected.Proteins, result.Proteins)
 	}
 	if result.Fats != expected.Fats {
-		t.Errorf("expected %f Fats, got %f", expected.Fats, result.Fats)
+		t.Errorf("expected %d Fats, got %d", expected.Fats, result.Fats)
 	}
 	if result.Carbohydrates != expected.Carbohydrates {
-		t.Errorf("expected %f Carbohydrates, got %f", expected.Carbohydrates, result.Carbohydrates)
+		t.Errorf("expected %d Carbohydrates, got %d", expected.Carbohydrates, result.Carbohydrates)
 	}
 	if result.Calories != expected.Calories {
-		t.Errorf("expected %f Calories, got %f", expected.Calories, result.Calories)
+		t.Errorf("expected %d Calories, got %d", expected.Calories, result.Calories)
 	}
 }
