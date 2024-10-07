@@ -5,8 +5,11 @@ import (
 )
 
 var (
+	// ErrWeightMustBeGreaterThanZero -- Вес должен быть больше нуля
 	ErrWeightMustBeGreaterThanZero = errors.New("weight must be greater than zero")
-	ErrIncorrectNutritionalValue   = errors.New("Nutritional value is not correct")
+
+	// ErrIncorrectNutritionalValue -- Пищевая ценность указана некорректно
+	ErrIncorrectNutritionalValue = errors.New("nutritional value is not correct")
 )
 
 // A NutritionalValueRelative represents a nutritional value per 100g of a product
@@ -27,29 +30,31 @@ type NutritionalValueAbsolute struct {
 
 // AddAbsoluteValue adds absolute nutritional value to existed NutritionalValueAbsolute and
 // returns new instance of NutritionalValueAbsolute.
-func (nv_left NutritionalValueAbsolute) AddAbsoluteValue(nv_right NutritionalValueAbsolute) NutritionalValueAbsolute {
+func (nvLeft NutritionalValueAbsolute) AddAbsoluteValue(nvRight NutritionalValueAbsolute) NutritionalValueAbsolute {
 	return NutritionalValueAbsolute{
-		Proteins:      nv_left.Proteins + nv_right.Proteins,
-		Fats:          nv_left.Fats + nv_right.Fats,
-		Carbohydrates: nv_left.Carbohydrates + nv_right.Carbohydrates,
-		Calories:      nv_left.Calories + nv_right.Calories,
+		Proteins:      nvLeft.Proteins + nvRight.Proteins,
+		Fats:          nvLeft.Fats + nvRight.Fats,
+		Carbohydrates: nvLeft.Carbohydrates + nvRight.Carbohydrates,
+		Calories:      nvLeft.Calories + nvRight.Calories,
 	}
 }
 
 // AddRelativeValue adds relative nutritional value multiplied by weight to existed NutritionalValueAbsolute and
 // returns new instance of NutritionalValueAbsolute and error in case of wrong weight.
-func (nv_left NutritionalValueAbsolute) AddRelativeValue(nv_right NutritionalValueRelative, weight_right int) (NutritionalValueAbsolute, error) {
-	if weight_right <= 0 {
+func (nvLeft NutritionalValueAbsolute) AddRelativeValue(nvRight NutritionalValueRelative, weightRight int) (NutritionalValueAbsolute, error) {
+	if weightRight <= 0 {
 		return NutritionalValueAbsolute{}, ErrWeightMustBeGreaterThanZero
 	}
 	return NutritionalValueAbsolute{
-		Proteins:      nv_left.Proteins + int(nv_right.Proteins*weight_right/100),
-		Fats:          nv_left.Fats + int(nv_right.Fats*weight_right/100),
-		Carbohydrates: nv_left.Carbohydrates + int(nv_right.Carbohydrates*weight_right/100),
-		Calories:      nv_left.Calories + int(nv_right.Calories*weight_right/100),
+		Proteins:      nvLeft.Proteins + int(nvRight.Proteins*weightRight/100),
+		Fats:          nvLeft.Fats + int(nvRight.Fats*weightRight/100),
+		Carbohydrates: nvLeft.Carbohydrates + int(nvRight.Carbohydrates*weightRight/100),
+		Calories:      nvLeft.Calories + int(nvRight.Calories*weightRight/100),
 	}, nil
 }
 
+// ValidateNutritionalValueRelative -- Проверяет, корректны ли значения пищевой ценности.
+// Если одно из значений белков, жиров, углеводов или калорий отрицательное, возвращает ошибку ErrIncorrectNutritionalValue.
 func ValidateNutritionalValueRelative(nv NutritionalValueRelative) error {
 	if nv.Proteins < 0 || nv.Fats < 0 || nv.Carbohydrates < 0 || nv.Calories < 0 {
 		return ErrIncorrectNutritionalValue

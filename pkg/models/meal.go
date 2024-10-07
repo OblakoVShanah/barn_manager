@@ -6,17 +6,32 @@ import (
 )
 
 var (
-	ErrIngrNotFound          = errors.New("ingredient not found")
-	ErrNegativeWeight        = errors.New("negative weight")
-	ErrNegativePrice         = errors.New("negative price")
-	ErrNegativeCalories      = errors.New("negative calories")
-	ErrNegativeProteins      = errors.New("negative proteins")
-	ErrNegativeFats          = errors.New("negative fats")
+	// ErrIngrNotFound -- Ингредиент не найден
+	ErrIngrNotFound = errors.New("ingredient not found")
+
+	// ErrNegativeWeight -- Отрицательный вес
+	ErrNegativeWeight = errors.New("negative weight")
+
+	// ErrNegativePrice -- Отрицательная цена
+	ErrNegativePrice = errors.New("negative price")
+
+	// ErrNegativeCalories -- Отрицательное количество калорий
+	ErrNegativeCalories = errors.New("negative calories")
+
+	// ErrNegativeProteins -- Отрицательное количество белков
+	ErrNegativeProteins = errors.New("negative proteins")
+
+	// ErrNegativeFats -- Отрицательное количество жиров
+	ErrNegativeFats = errors.New("negative fats")
+
+	// ErrNegativeCarbohydrates -- Отрицательное количество углеводов
 	ErrNegativeCarbohydrates = errors.New("negative carbohydrates")
 )
 
+// Meal -- Структура, представляющая приём пищи.
+// Содержит информацию о времени приёма пищи, ингредиентах, питательных веществах и цене.
 type Meal struct {
-	Id               string
+	ID               string
 	EatingTime       time.Time
 	IngridientMap    map[string]Ingridient
 	NutritionalValue NutritionalValueAbsolute
@@ -36,10 +51,10 @@ func (ingredient *Ingridient) ValidateIngridient() error {
 	if ingredient.Weight < 0 {
 		return ErrNegativeWeight
 	}
-	if error := ingredient.FoodProduct.ValidateFoodproduct() ; error != nil {
+	if error := ingredient.FoodProduct.ValidateFoodproduct(); error != nil {
 		return error
 	}
-	
+
 	return nil
 }
 
@@ -130,4 +145,3 @@ func (m *Meal) CalculateTotalPrice() (float32, error) {
 	m.Price = totalPrice
 	return totalPrice, nil
 }
-

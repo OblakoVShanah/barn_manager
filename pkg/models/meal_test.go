@@ -8,7 +8,7 @@ import (
 func TestMeal_AddIngredient(t *testing.T) {
 	t.Parallel()
 	meal := Meal{
-		Id:            "1",
+		ID:            "1",
 		EatingTime:    time.Now(),
 		IngridientMap: map[string]Ingridient{},
 		Price:         0,
@@ -45,7 +45,7 @@ func TestMeal_AddIngredient(t *testing.T) {
 func TestMeal_RemoveIngredient(t *testing.T) {
 	t.Parallel()
 	meal := Meal{
-		Id:         "1",
+		ID:         "1",
 		EatingTime: time.Now(),
 		IngridientMap: map[string]Ingridient{
 			"Chicken": {
@@ -87,7 +87,7 @@ func TestMeal_RemoveIngredient(t *testing.T) {
 func TestMeal_CalculateTotalPrice(t *testing.T) {
 	t.Parallel()
 	meal := Meal{
-		Id:         "1",
+		ID:         "1",
 		EatingTime: time.Now(),
 		IngridientMap: map[string]Ingridient{
 			"Chicken": {
@@ -160,4 +160,3 @@ func TestMeal_CalculateTotalPrice(t *testing.T) {
 		t.Errorf("expected error: %v", ErrNegativePrice)
 	}
 }
-
