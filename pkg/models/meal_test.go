@@ -74,6 +74,11 @@ func TestMeal_RemoveIngredient(t *testing.T) {
 	if len(meal.IngridientMap) != 0 {
 		t.Errorf("expected 0 ingredients, got %d", len(meal.IngridientMap))
 	}
+
+	err = meal.RemoveIngredient("Fish")
+	if err == nil {
+		t.Errorf("expected error: %v", ErrIngrNotFound)
+	}
 }
 
 func TestMeal_CalculateTotalPrice(t *testing.T) {

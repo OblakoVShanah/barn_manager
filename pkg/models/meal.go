@@ -1,9 +1,12 @@
 package models
 
 import (
+	"errors"
   "fmt"
   "time"
 )
+
+var ErrIngrNotFound = errors.New("ingredient not found")
 
 type Meal struct {
 	Id               string
@@ -33,7 +36,7 @@ func (m *Meal) AddIngredient(ingredient Ingridient) {
 func (m *Meal) RemoveIngredient(name string) error {
 	// Check if ingredient exists
 	if _, exists := m.IngridientMap[name]; !exists {
-	return fmt.Errorf("ingredient not found")
+		return ErrIngrNotFound
 	}
 
 	// Remove from map
@@ -47,10 +50,9 @@ func (m *Meal) UpdateIngredientWeight(name string, newWeight float32) error {
 	// Lookup ingredient in map
 	ingredient, exists := m.IngridientMap[name]
 	if !exists {
-	return fmt.Errorf("ingredient not found")
+		return ErrIngrNotFound
 	}
 
-	// Update weight in map
 	ingredient.Weight = newWeight
 	m.IngridientMap[name] = ingredient
 
@@ -58,7 +60,7 @@ func (m *Meal) UpdateIngredientWeight(name string, newWeight float32) error {
 	return nil
 }
 
-func (m *Meal) updateNutritionalValueAndWeight() {
+func (m *Meal) updateNutritionalValueAndWeight() error {
 	m.NutritionalValue = NutritionalValueAbsolute{
 		Proteins:      0,
 		Fats:          0,
@@ -67,8 +69,13 @@ func (m *Meal) updateNutritionalValueAndWeight() {
 	}
 
 	for _, ingredient := range m.IngridientMap {
-		m.NutritionalValue = m.NutritionalValue.AddRelativeValue(ingredient.FoodProduct.NutritionalValueRelative, ingredient.Weight / 100)
+		nv, err := m.NutritionalValue.AddRelativeValue(ingredient.FoodProduct.NutritionalValueRelative, ingredient.Weight/100)
+		if err != nil {
+			return err
+		}
+		m.NutritionalValue = nv
 	}
+	return nil
 }
 
 func (m *Meal) CalculateTotalPrice() float32 {
