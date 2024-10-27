@@ -1,11 +1,13 @@
-package barn
+package product
 
 import (
 	"context"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/common"
 	"time"
+
+	common "github.com/OblakoVShanah/havchik_podbirator/internal/models"
 )
 
+// FoodProduct представляет собой продукт питания в хранилище
 type FoodProduct struct {
 	ID                       string                          `json:"id"`
 	Name                     string                          `json:"name"`
@@ -17,12 +19,18 @@ type FoodProduct struct {
 	NutritionalValueRelative common.NutritionalValueRelative `json:"nutritional_value_relative"`
 }
 
+// Service определяет интерфейс для работы с продуктами
 type Service interface {
+	// AvailableProducts возвращает список доступных продуктов
 	AvailableProducts(ctx context.Context) ([]FoodProduct, error)
+	// PlaceProduct добавляет новый продукт в хранилище
 	PlaceProduct(ctx context.Context, product FoodProduct) (id string, err error)
 }
 
+// Store определяет интерфейс для хранения продуктов
 type Store interface {
+	// LoadProducts загружает все продукты из хранилища
 	LoadProducts(ctx context.Context) ([]FoodProduct, error)
+	// SaveProduct сохраняет продукт в хранилище
 	SaveProduct(ctx context.Context, product FoodProduct) (id string, err error)
 }

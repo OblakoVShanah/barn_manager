@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/OblakoVShanah/havchik_podbirator/internal/barn"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/common"
+	common "github.com/OblakoVShanah/havchik_podbirator/internal/models"
+	"github.com/OblakoVShanah/havchik_podbirator/internal/product"
 	"github.com/jmoiron/sqlx"
+
 	// "time"
+	"github.com/OblakoVShanah/havchik_podbirator/internal/oops"
 )
 
 type dbFoodProduct struct {
@@ -34,7 +36,7 @@ func NewStorage(db *sqlx.DB) *Storage {
 	}
 }
 
-func (s *Storage) LoadProducts(ctx context.Context) ([]barn.FoodProduct, error) {
+func (s *Storage) LoadProducts(ctx context.Context) ([]product.FoodProduct, error) {
 	var dbProducts []dbFoodProduct
 	query := `
 		SELECT id, name, weight_per_pkg, amount, price_per_pkg, expiration_date, 
@@ -43,14 +45,18 @@ func (s *Storage) LoadProducts(ctx context.Context) ([]barn.FoodProduct, error) 
 	`
 	err := s.db.SelectContext(ctx, &dbProducts, query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to select products: %w", err)
+		return nil, oops.NewDBError(err, "LoadProducts", "")
 	}
 
-	products := make([]barn.FoodProduct, 0, len(dbProducts))
+	if len(dbProducts) == 0 {
+		return nil, oops.ErrNoData
+	}
+
+	products := make([]product.FoodProduct, 0, len(dbProducts))
 	for _, dbp := range dbProducts {
 		product, err := convertToFoodProduct(dbp)
 		if err != nil {
-			return nil, fmt.Errorf("failed to convert product: %w", err)
+			return nil, oops.NewValidationError("product_conversion", err)
 		}
 		products = append(products, product)
 	}
@@ -58,10 +64,14 @@ func (s *Storage) LoadProducts(ctx context.Context) ([]barn.FoodProduct, error) 
 	return products, nil
 }
 
-func (s *Storage) SaveProduct(ctx context.Context, product barn.FoodProduct) (id string, err error) {
+func (s *Storage) SaveProduct(ctx context.Context, product product.FoodProduct) (id string, err error) {
+	if product.ID == "" {
+		return "", oops.NewValidationError("id", oops.ErrInvalidProduct)
+	}
+
 	dbp, err := convertToDBFoodProduct(product)
 	if err != nil {
-		return "", fmt.Errorf("failed to convert product to DB format: %w", err)
+		return "", oops.NewValidationError("conversion", err)
 	}
 
 	query := `
@@ -76,54 +86,54 @@ func (s *Storage) SaveProduct(ctx context.Context, product barn.FoodProduct) (id
 
 	rows, err := s.db.NamedQueryContext(ctx, query, dbp)
 	if err != nil {
-		return "", fmt.Errorf("failed to insert product: %w", err)
+		return "", oops.NewDBError(err, "SaveProduct", product.ID)
 	}
 	defer rows.Close()
 
 	if rows.Next() {
 		err = rows.Scan(&id)
 		if err != nil {
-			return "", fmt.Errorf("failed to scan returned id: %w", err)
+			return "", oops.NewDBError(err, "SaveProduct.Scan", product.ID)
 		}
 	} else {
-		return "", fmt.Errorf("no id returned after insert")
+		return "", oops.NewDBError(oops.ErrNoData, "SaveProduct.NoID", product.ID)
 	}
 
 	return id, nil
 }
 
-func convertToFoodProduct(dbp dbFoodProduct) (barn.FoodProduct, error) {
+func convertToFoodProduct(dbp dbFoodProduct) (product.FoodProduct, error) {
 	if !dbp.ID.Valid {
-		return barn.FoodProduct{}, fmt.Errorf("invalid ID")
+		return product.FoodProduct{}, fmt.Errorf("invalid ID")
 	}
 
 	weightPerPkg := uint(dbp.WeightPerPkg.Int64)
 	if !dbp.WeightPerPkg.Valid || weightPerPkg == 0 {
-		return barn.FoodProduct{}, fmt.Errorf("invalid WeightPerPkg")
+		return product.FoodProduct{}, fmt.Errorf("invalid WeightPerPkg")
 	}
 
 	amount := uint(dbp.Amount.Int64)
 	if !dbp.Amount.Valid {
-		return barn.FoodProduct{}, fmt.Errorf("invalid Amount")
+		return product.FoodProduct{}, fmt.Errorf("invalid Amount")
 	}
 
 	if !dbp.PricePerPkg.Valid {
-		return barn.FoodProduct{}, fmt.Errorf("invalid PricePerPkg")
+		return product.FoodProduct{}, fmt.Errorf("invalid PricePerPkg")
 	}
 
 	if !dbp.ExpirationDate.Valid {
-		return barn.FoodProduct{}, fmt.Errorf("invalid ExpirationDate")
+		return product.FoodProduct{}, fmt.Errorf("invalid ExpirationDate")
 	}
 
 	if !dbp.PresentInFridge.Valid {
-		return barn.FoodProduct{}, fmt.Errorf("invalid PresentInFridge")
+		return product.FoodProduct{}, fmt.Errorf("invalid PresentInFridge")
 	}
 
 	if !dbp.ProteinRelative.Valid || !dbp.FatRelative.Valid || !dbp.CarbohydratesRelative.Valid {
-		return barn.FoodProduct{}, fmt.Errorf("invalid NutritionalValueRelative")
+		return product.FoodProduct{}, fmt.Errorf("invalid NutritionalValueRelative")
 	}
 
-	return barn.FoodProduct{
+	return product.FoodProduct{
 		ID:              dbp.ID.String,
 		Name:            dbp.Name.String,
 		WeightPerPkg:    weightPerPkg,
@@ -139,7 +149,7 @@ func convertToFoodProduct(dbp dbFoodProduct) (barn.FoodProduct, error) {
 	}, nil
 }
 
-func convertToDBFoodProduct(fp barn.FoodProduct) (dbFoodProduct, error) {
+func convertToDBFoodProduct(fp product.FoodProduct) (dbFoodProduct, error) {
 	if fp.ID == "" {
 		return dbFoodProduct{}, fmt.Errorf("invalid ID")
 	}
