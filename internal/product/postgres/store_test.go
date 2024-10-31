@@ -14,7 +14,7 @@ import (
 
 // setupTestDB создает тестовое подключение к базе данных
 func setupTestDB(t *testing.T) *sqlx.DB {
-	db, err := sqlx.Connect("postgres", "postgres://test:test@localhost:5432/testdb?sslmode=disable")
+	db, err := sqlx.Connect("postgres", "postgres://test:test@localhost:5432/testdb?sslmode=disable") // TODO: заменить на переменные окружения
 	require.NoError(t, err)
 	return db
 }

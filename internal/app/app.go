@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/OblakoVShanah/havchik_podbirator/internal/product"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product/postgres"
+	"github.com/OblakoVShanah/havchik_podbirator/internal/product/memory"
+	// "github.com/OblakoVShanah/havchik_podbirator/internal/product/postgres"
 	"github.com/go-chi/chi/v5"
-	"github.com/jmoiron/sqlx"
+	// "github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // драйвер postgres
 )
 
@@ -66,19 +67,20 @@ func New(ctx context.Context, config *Config) (*App, error) {
 
 // Setup инициализирует приложение
 func (a *App) Setup(ctx context.Context, dsn string) error {
-	// Инициализация подключения к базе данных
-	db, err := sqlx.ConnectContext(ctx, "postgres", dsn)
-	if err != nil {
-		return fmt.Errorf("не удалось подключиться к базе данных: %w", err)
-	}
+	// // Инициализация подключения к базе данных
+	// db, err := sqlx.ConnectContext(ctx, "postgres", dsn)
+	// if err != nil {
+	// 	return fmt.Errorf("не удалось подключиться к базе данных: %w", err)
+	// }
 
-	// Тестирование подключения
-	if err := db.PingContext(ctx); err != nil {
-		return fmt.Errorf("не удалось выполнить ping базы данных: %w", err)
-	}
+	// // Тестирование подключения
+	// if err := db.PingContext(ctx); err != nil {
+	// 	return fmt.Errorf("не удалось выполнить ping базы данных: %w", err)
+	// }
 
 	// Инициализация хранилища
-	store := postgres.NewStorage(db)
+	// store := postgres.NewStorage(db)
+	store := memory.NewStorage()
 
 	// Инициализация сервиса
 	service := product.NewService(store)

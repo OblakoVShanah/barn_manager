@@ -25,13 +25,19 @@ func (s *AppService) AvailableProducts(ctx context.Context) ([]FoodProduct, erro
 		if errors.Is(err, oops.ErrNoData) {
 			return nil, err
 		}
-		return products, nil
+		return nil, err
 	}
 	return products, nil
 }
 
 // PlaceProduct добавляет новый продукт в хранилище
 func (s *AppService) PlaceProduct(ctx context.Context, product FoodProduct) (id string, err error) {
+	// Проверка валидности продукта
+	if product.ID == "" || product.Name == "" || product.WeightPerPkg == 0 {
+		return "", oops.ErrInvalidProduct
+	}
+
+	// Существующая проверка срока годности
 	if time.Now().After(product.ExpirationDate) {
 		return "", oops.ErrExpiredProduct
 	}
