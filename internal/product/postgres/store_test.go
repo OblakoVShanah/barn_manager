@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	common "github.com/OblakoVShanah/havchik_podbirator/internal/models"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product/postgres"
+	common "github.com/OblakoVShanah/barn_manager/internal/models"
+	"github.com/OblakoVShanah/barn_manager/internal/product"
+	"github.com/OblakoVShanah/barn_manager/internal/product/postgres"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/require"
 )

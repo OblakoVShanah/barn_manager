@@ -1,4 +1,4 @@
-module github.com/OblakoVShanah/havchik_podbirator
+module github.com/OblakoVShanah/barn_manager
 
 go 1.23.1
 

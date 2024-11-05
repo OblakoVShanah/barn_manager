@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	common "github.com/OblakoVShanah/havchik_podbirator/internal/models"
+	common "github.com/OblakoVShanah/barn_manager/internal/models"
 )
 
 // FoodProduct представляет собой продукт питания в хранилище

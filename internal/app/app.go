@@ -9,9 +9,10 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product/memory"
-	// "github.com/OblakoVShanah/havchik_podbirator/internal/product/postgres"
+	"github.com/OblakoVShanah/barn_manager/internal/product"
+	"github.com/OblakoVShanah/barn_manager/internal/product/memory"
+
+	// "github.com/OblakoVShanah/barn_manager/internal/product/postgres"
 	"github.com/go-chi/chi/v5"
 	// "github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // драйвер postgres

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/OblakoVShanah/havchik_podbirator/internal/oops"
+	"github.com/OblakoVShanah/barn_manager/internal/oops"
 )
 
 // AppService реализует бизнес-логику работы с продуктами

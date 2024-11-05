@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/OblakoVShanah/havchik_podbirator/internal/app"
+	"github.com/OblakoVShanah/barn_manager/internal/app"
 )
 
 func main() {

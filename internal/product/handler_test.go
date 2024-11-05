@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	common "github.com/OblakoVShanah/havchik_podbirator/internal/models"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product/mock"
+	common "github.com/OblakoVShanah/barn_manager/internal/models"
+	"github.com/OblakoVShanah/barn_manager/internal/product"
+	"github.com/OblakoVShanah/barn_manager/internal/product/mock"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/go-cmp/cmp"
 )

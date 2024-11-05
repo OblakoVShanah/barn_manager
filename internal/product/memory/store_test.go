@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	common "github.com/OblakoVShanah/havchik_podbirator/internal/models"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product"
+	common "github.com/OblakoVShanah/barn_manager/internal/models"
+	"github.com/OblakoVShanah/barn_manager/internal/product"
 
 	"github.com/google/go-cmp/cmp"
 )

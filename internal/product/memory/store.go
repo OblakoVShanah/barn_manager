@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/OblakoVShanah/havchik_podbirator/internal/oops"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product"
+	"github.com/OblakoVShanah/barn_manager/internal/oops"
+	"github.com/OblakoVShanah/barn_manager/internal/product"
 )
 
 // Storage реализует хранилище продуктов в памяти

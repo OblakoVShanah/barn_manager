@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	common "github.com/OblakoVShanah/havchik_podbirator/internal/models"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/product/mock"
-	"github.com/OblakoVShanah/havchik_podbirator/internal/oops"
+	common "github.com/OblakoVShanah/barn_manager/internal/models"
+	"github.com/OblakoVShanah/barn_manager/internal/oops"
+	"github.com/OblakoVShanah/barn_manager/internal/product"
+	"github.com/OblakoVShanah/barn_manager/internal/product/mock"
 )
 
 func TestAvailableProducts(t *testing.T) {
