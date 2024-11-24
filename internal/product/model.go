@@ -19,12 +19,19 @@ type FoodProduct struct {
 	NutritionalValueRelative common.NutritionalValueRelative `json:"nutritional_value_relative"`
 }
 
+// ShoppingList представляет список продуктов, необходимых для приготовления блюда
+type ShoppingList struct {
+	Products []FoodProduct `json:"products"`
+}
+
 // Service определяет интерфейс для работы с продуктами
 type Service interface {
 	// AvailableProducts возвращает список доступных продуктов
 	AvailableProducts(ctx context.Context) ([]FoodProduct, error)
 	// PlaceProduct добавляет новый продукт в хранилище
 	PlaceProduct(ctx context.Context, product FoodProduct) (id string, err error)
+	// CheckAvailability проверяет доступность продуктов для приготовления блюда
+	CheckAvailability(ctx context.Context, requirements map[string]uint) (ShoppingList, error)
 }
 
 // Store определяет интерфейс для хранения продуктов

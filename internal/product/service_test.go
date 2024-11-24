@@ -101,3 +101,96 @@ func TestPlaceProduct(t *testing.T) {
 		}
 	})
 }
+
+func TestCheckAvailability(t *testing.T) {
+	store := mock.NewStore()
+	service := product.NewService(store)
+	ctx := context.Background()
+
+	// Setup test products in store
+	availableProducts := []product.FoodProduct{
+		{
+			ID:              "milk",
+			Name:            "Молоко",
+			WeightPerPkg:    1000, // 1 литр
+			Amount:          2,    // 2 пакета
+			PresentInFridge: true,
+		},
+		{
+			ID:              "flour",
+			Name:            "Мука",
+			WeightPerPkg:    1000, // 1 кг
+			Amount:          1,    // 1 пакет
+			PresentInFridge: true,
+		},
+	}
+	store.SetProducts(availableProducts)
+
+	t.Run("все продукты доступны", func(t *testing.T) {
+		requirements := map[string]uint{
+			"milk":  500, // 500 мл молока
+			"flour": 250, // 250 г муки
+		}
+
+		shoppingList, err := service.CheckAvailability(ctx, requirements)
+		if err != nil {
+			t.Fatalf("Неожиданная ошибка: %v", err)
+		}
+
+		if len(shoppingList.Products) != 0 {
+			t.Errorf("Ожидался пустой список покупок, получено %d продуктов", len(shoppingList.Products))
+		}
+	})
+
+	t.Run("недостаточно продуктов", func(t *testing.T) {
+		requirements := map[string]uint{
+			"milk":  3000, // 3 литра молока (больше чем есть)
+			"flour": 250,  // 250 г муки
+		}
+
+		shoppingList, err := service.CheckAvailability(ctx, requirements)
+		if err != nil {
+			t.Fatalf("Неожиданная ошибка: %v", err)
+		}
+
+		if len(shoppingList.Products) != 1 {
+			t.Fatalf("Ожидался 1 продукт в списке покупок, получено %d", len(shoppingList.Products))
+		}
+
+		if shoppingList.Products[0].ID != "milk" {
+			t.Errorf("Ожидался продукт milk в списке покупок, получен %s", shoppingList.Products[0].ID)
+		}
+	})
+
+	t.Run("продукт отсутствует", func(t *testing.T) {
+		requirements := map[string]uint{
+			"sugar": 100, // сахар отсутствует в хранилище
+		}
+
+		shoppingList, err := service.CheckAvailability(ctx, requirements)
+		if err != nil {
+			t.Fatalf("Неожиданная ошибка: %v", err)
+		}
+
+		if len(shoppingList.Products) != 1 {
+			t.Fatalf("Ожидался 1 продукт в списке покупок, получено %d", len(shoppingList.Products))
+		}
+
+		if shoppingList.Products[0].ID != "sugar" {
+			t.Errorf("Ожидался продукт sugar в списке покупок, получен %s", shoppingList.Products[0].ID)
+		}
+	})
+
+	t.Run("ошибка хранилища", func(t *testing.T) {
+		store.SetError(oops.ErrDBConnection)
+
+		requirements := map[string]uint{
+			"milk": 500,
+		}
+
+		_, err := service.CheckAvailability(ctx, requirements)
+		if !errors.Is(err, oops.ErrDBConnection) {
+			t.Errorf("Ожидалась ошибка %v, получено %v", oops.ErrDBConnection, err)
+		}
+	})
+}

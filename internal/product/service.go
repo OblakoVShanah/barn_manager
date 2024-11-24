@@ -48,3 +48,45 @@ func (s *AppService) PlaceProduct(ctx context.Context, product FoodProduct) (id 
 	}
 	return id, nil
 }
+
+// CheckAvailability проверяет доступность продуктов для покупки
+func (s *AppService) CheckAvailability(ctx context.Context, requirements map[string]uint) (ShoppingList, error) {
+	// Получаем все доступные продукты
+	products, err := s.storage.LoadProducts(ctx)
+	if err != nil && !errors.Is(err, oops.ErrNoData) {
+		return ShoppingList{}, err
+	}
+
+	// Создаем мапу для быстрого поиска продуктов
+	availableProducts := make(map[string]FoodProduct)
+	for _, p := range products {
+		if p.PresentInFridge {
+			availableProducts[p.ID] = p
+		}
+	}
+
+	// Проверяем каждый требуемый продукт
+	var shoppingList ShoppingList
+	for productID, requiredAmount := range requirements {
+		product, exists := availableProducts[productID]
+		if !exists {
+			// Если продукт отсутствует, добавляем его в список покупок
+			shoppingList.Products = append(shoppingList.Products, FoodProduct{
+				ID:     productID,
+				Amount: requiredAmount,
+			})
+			continue
+		}
+
+		// Проверяем, достаточно ли продукта
+		availableAmount := product.Amount * product.WeightPerPkg
+		if availableAmount < requiredAmount {
+			// Если продукта недостаточно, добавляем недостающее количество в список покупок
+			neededAmount := requiredAmount - availableAmount
+			product.Amount = neededAmount
+			shoppingList.Products = append(shoppingList.Products, product)
+		}
+	}
+
+	return shoppingList, nil
+}

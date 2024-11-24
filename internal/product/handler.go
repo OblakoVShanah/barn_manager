@@ -27,6 +27,7 @@ func (handler *Handler) Register() {
 	handler.router.Group(func(r chi.Router) {
 		r.Get("/api/v1/products", handler.getProducts)
 		r.Post("/api/v1/products", handler.postProducts)
+		r.Post("/api/v1/products/check-availability", handler.checkProductsAvailability)
 	})
 }
 
@@ -61,4 +62,47 @@ func (handler *Handler) postProducts(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "Product placed with ID: %s", id)
+}
+
+// checkProductsAvailability проверяет наличие необходимых продуктов
+func (handler *Handler) checkProductsAvailability(w http.ResponseWriter, r *http.Request) {
+	var recipe struct {
+		Steps       []string                   `json:"steps"`
+		Ingredients []map[string]interface{}   `json:"ingredients"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
+		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Convert ingredients to requirements map
+	requirements := make(map[string]uint)
+	for _, ingredient := range recipe.Ingredients {
+		productID, ok := ingredient["product_id"].(string)
+		if !ok {
+			http.Error(w, "Invalid product_id in ingredients", http.StatusBadRequest)
+			return
+		}
+		
+		amount, ok := ingredient["amount"].(float64)
+		if !ok {
+			http.Error(w, "Invalid amount in ingredients", http.StatusBadRequest)
+			return
+		}
+		
+		requirements[productID] = uint(amount)
+	}
+
+	shoppingList, err := handler.service.CheckAvailability(r.Context(), requirements)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(shoppingList); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

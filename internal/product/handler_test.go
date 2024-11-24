@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+	"bytes"
+	"strings"
 
 	common "github.com/OblakoVShanah/barn_manager/internal/models"
 	"github.com/OblakoVShanah/barn_manager/internal/product"
@@ -68,6 +70,121 @@ func TestHandler_getProducts(t *testing.T) {
 		mockStore.SetError(errors.New("database error"))
 
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/products", nil)
+		rr := httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusInternalServerError {
+			t.Errorf("handler returned wrong status code: got %v want %v",
+				rr.Code, http.StatusInternalServerError)
+		}
+	})
+}
+
+func TestHandler_checkProductsAvailability(t *testing.T) {
+	mockStore := mock.NewStore()
+	router := chi.NewRouter()
+	service := product.NewService(mockStore)
+	handler := product.NewHandler(router, service)
+	handler.Register()
+
+	// Setup test products in store
+	testProducts := []product.FoodProduct{
+		{
+			ID:              "овсяные_хлопья",
+			Name:            "Овсяные хлопья",
+			WeightPerPkg:    1000,
+			Amount:          1,
+			PresentInFridge: true,
+		},
+		{
+			ID:              "молоко",
+			Name:            "Молоко",
+			WeightPerPkg:    1000,
+			Amount:          1,
+			PresentInFridge: true,
+		},
+	}
+	mockStore.SetProducts(testProducts)
+
+	t.Run("successful check", func(t *testing.T) {
+		recipe := map[string]interface{}{
+			"steps": []string{
+				"Вскипятить молоко",
+				"Добавить хлопья",
+				"Варить 5 минут",
+			},
+			"ingredients": []map[string]interface{}{
+				{
+					"amount":     100.0,
+					"product_id": "овсяные_хлопья",
+				},
+				{
+					"amount":     200.0,
+					"product_id": "молоко",
+				},
+			},
+		}
+
+		body, err := json.Marshal(recipe)
+		if err != nil {
+			t.Fatalf("Failed to marshal request body: %v", err)
+		}
+
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/products/check-availability", bytes.NewBuffer(body))
+		rr := httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v",
+				rr.Code, http.StatusOK)
+		}
+
+		var got product.ShoppingList
+		err = json.NewDecoder(rr.Body).Decode(&got)
+		if err != nil {
+			t.Fatalf("Failed to decode response: %v", err)
+		}
+
+		// Since all products are available, shopping list should be empty
+		if len(got.Products) != 0 {
+			t.Errorf("Expected empty shopping list, got %d items", len(got.Products))
+		}
+	})
+
+	t.Run("invalid request body", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/products/check-availability", strings.NewReader("invalid json"))
+		rr := httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusBadRequest {
+			t.Errorf("handler returned wrong status code: got %v want %v",
+				rr.Code, http.StatusBadRequest)
+		}
+	})
+
+	t.Run("service error", func(t *testing.T) {
+		mockStore.SetError(errors.New("database error"))
+
+		recipe := map[string]interface{}{
+			"steps": []string{"Step 1"},
+			"ingredients": []map[string]interface{}{
+				{
+					"unit":       "г",
+					"amount":     100.0,
+					"product_id": "овсяные_хлопья",
+				},
+			},
+		}
+
+		body, err := json.Marshal(recipe)
+		if err != nil {
+			t.Fatalf("Failed to marshal request body: %v", err)
+		}
+
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/products/check-availability", bytes.NewBuffer(body))
 		rr := httptest.NewRecorder()
 
 		router.ServeHTTP(rr, req)
