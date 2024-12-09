@@ -72,7 +72,7 @@ func TestStorage_SaveAndLoadProducts(t *testing.T) {
 			if p.ID == testProduct.ID {
 				found = true
 				require.Equal(t, "Обновленный продукт", p.Name)
-				require.Equal(t, uint(2), p.Amount)
+				require.Equal(t, uint(3), p.Amount)
 				break
 			}
 		}

@@ -30,9 +30,9 @@ func (s *Storage) SaveProduct(ctx context.Context, product product.FoodProduct) 
 		ON DUPLICATE KEY UPDATE
 			name = VALUES(name),
 			weight_per_pkg = VALUES(weight_per_pkg),
-			amount = VALUES(amount),
-			price_per_pkg = VALUES(price_per_pkg),
-			expiration_date = VALUES(expiration_date),
+			amount = amount + VALUES(amount),
+			price_per_pkg = (amount * price_per_pkg + VALUES(amount) * VALUES(price_per_pkg)) / (amount + VALUES(amount)),
+			expiration_date = least(VALUES(expiration_date), expiration_date),
 			present_in_fridge = VALUES(present_in_fridge),
 			proteins = VALUES(proteins),
 			fats = VALUES(fats),

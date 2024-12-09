@@ -60,15 +60,13 @@ func (s *AppService) CheckAvailability(ctx context.Context, requirements map[str
 	// Создаем мапу для быстрого поиска продуктов
 	availableProducts := make(map[string]FoodProduct)
 	for _, p := range products {
-		if p.PresentInFridge {
-			availableProducts[p.ID] = p
-		}
+		availableProducts[p.ID] = p
 	}
 
 	// Проверяем каждый требуемый продукт
 	var shoppingList ShoppingList
 	for productID, requiredAmount := range requirements {
-		product, exists := availableProducts[productID]
+		availableProduct, exists := availableProducts[productID]
 		if !exists {
 			// Если продукт отсутствует, добавляем его в список покупок
 			shoppingList.Products = append(shoppingList.Products, FoodProduct{
@@ -79,12 +77,11 @@ func (s *AppService) CheckAvailability(ctx context.Context, requirements map[str
 		}
 
 		// Проверяем, достаточно ли продукта
-		availableAmount := product.Amount * product.WeightPerPkg
-		if availableAmount < requiredAmount {
+		if availableProduct.Amount < requiredAmount {
 			// Если продукта недостаточно, добавляем недостающее количество в список покупок
-			neededAmount := requiredAmount - availableAmount
-			product.Amount = neededAmount
-			shoppingList.Products = append(shoppingList.Products, product)
+			neededAmount := requiredAmount - availableProduct.Amount
+			availableProduct.Amount = neededAmount
+			shoppingList.Products = append(shoppingList.Products, availableProduct)
 		}
 	}
 
