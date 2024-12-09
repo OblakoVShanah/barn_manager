@@ -10,12 +10,14 @@ import (
 	"time"
 
 	"github.com/OblakoVShanah/barn_manager/internal/product"
-	"github.com/OblakoVShanah/barn_manager/internal/product/memory"
-
 	// "github.com/OblakoVShanah/barn_manager/internal/product/postgres"
+	"github.com/OblakoVShanah/barn_manager/internal/product/mysql"
+	// "github.com/OblakoVShanah/barn_manager/internal/product/memory"
 	"github.com/go-chi/chi/v5"
-	// "github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq" // драйвер postgres
+	"github.com/jmoiron/sqlx"
+	_ "github.com/go-sql-driver/mysql" // драйвер mysql
+	// _ "github.com/lib/pq" // драйвер postgres
+	"gopkg.in/yaml.v3"
 )
 
 // Config представляет конфигурацию приложения
@@ -27,17 +29,20 @@ type Config struct {
 	}
 }
 
-// NewConfig создает конфигурацию приложения из переменных окружения
+// NewConfig создает конфигурацию приложения из yaml файла
 func NewConfig(configPath string) (*Config, error) {
-	return &Config{
-		Host: "0.0.0.0",
-		Port: os.Getenv("SERVER_PORT"),
-		DB: struct {
-			DSN string
-		}{
-			DSN: os.Getenv("DATABASE_URL"),
-		},
-	}, nil
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading config file: %w", err)
+	}
+
+	config := &Config{}
+
+	if err := yaml.Unmarshal(data, config); err != nil {
+		return nil, fmt.Errorf("error parsing config file: %w", err)
+	}
+
+	return config, nil
 }
 
 // App это структура приложения
@@ -69,19 +74,21 @@ func New(ctx context.Context, config *Config) (*App, error) {
 // Setup инициализирует приложение
 func (a *App) Setup(ctx context.Context, dsn string) error {
 	// // Инициализация подключения к базе данных
+	db, err := sqlx.Connect("mysql", "barn_manager:barn_manager@tcp(localhost:3306)/barn?parseTime=true&loc=Local")
 	// db, err := sqlx.ConnectContext(ctx, "postgres", dsn)
-	// if err != nil {
-	// 	return fmt.Errorf("не удалось подключиться к базе данных: %w", err)
-	// }
+	if err != nil {
+		return fmt.Errorf("не удалось подключиться к базе данных: %w", err)
+	}
 
-	// // Тестирование подключения
-	// if err := db.PingContext(ctx); err != nil {
-	// 	return fmt.Errorf("не удалось выполнить ping базы данных: %w", err)
-	// }
+	// Тестирование подключения
+	if err := db.PingContext(ctx); err != nil {
+		return fmt.Errorf("не удалось выполнить ping базы данных: %w", err)
+	}
 
 	// Инициализация хранилища
 	// store := postgres.NewStorage(db)
-	store := memory.NewStorage()
+	store := mysql.NewStorage(db)
+	// store := memory.NewStorage()
 
 	// Инициализация сервиса
 	service := product.NewService(store)

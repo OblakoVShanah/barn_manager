@@ -11,12 +11,8 @@ import (
 
 // Тестирование конфигурации
 func TestNewConfig(t *testing.T) {
-	// Подготавливаем тестовые переменные окружения
-	t.Setenv("SERVER_PORT", "8080")
-	t.Setenv("DATABASE_URL", "postgres://test:test@localhost:5432/testdb")
-
 	// Тестируем создание конфигурации
-	config, err := NewConfig("")
+	config, err := NewConfig("../../configs/config_test.yaml")
 	if err != nil {
 		t.Fatalf("Неожиданная ошибка при создании конфигурации: %v", err)
 	}
@@ -25,7 +21,7 @@ func TestNewConfig(t *testing.T) {
 	if config.Port != "8080" {
 		t.Errorf("Ожидался порт 8080, получено: %s", config.Port)
 	}
-	if config.DB.DSN != "postgres://test:test@localhost:5432/testdb" {
+	if config.DB.DSN != "barn_manager:barn_manager@tcp(localhost:3306)/barn_test?parseTime=true&loc=Local" {
 		t.Errorf("Неверный DSN, получено: %s", config.DB.DSN)
 	}
 }
@@ -102,14 +98,9 @@ func routeExists(router *chi.Mux, path string) bool {
 
 // Тестирование запуска приложения
 func TestApp_Start(t *testing.T) {
-	config := &Config{
-		Host: "localhost",
-		Port: "0", // Используем порт 0 для автоматического выбора свободного порта
-		DB: struct {
-			DSN string
-		}{
-			DSN: "postgres://test:test@localhost:5432/testdb?sslmode=disable",
-		},
+	config, err := NewConfig("../../configs/config_test.yaml")
+	if err != nil {
+		t.Fatalf("Неожиданная ошибка при создании конфигурации: %v", err)
 	}
 
 	app, err := New(context.Background(), config)

@@ -112,15 +112,15 @@ func TestCheckAvailability(t *testing.T) {
 		{
 			ID:              "milk",
 			Name:            "Молоко",
-			WeightPerPkg:    1000, // 1 литр
-			Amount:          2,    // 2 пакета
+			WeightPerPkg:    1000,
+			Amount:          1000,
 			PresentInFridge: true,
 		},
 		{
 			ID:              "flour",
 			Name:            "Мука",
-			WeightPerPkg:    1000, // 1 кг
-			Amount:          1,    // 1 пакет
+			WeightPerPkg:    1000,
+			Amount:          1500,
 			PresentInFridge: true,
 		},
 	}
@@ -128,8 +128,8 @@ func TestCheckAvailability(t *testing.T) {
 
 	t.Run("все продукты доступны", func(t *testing.T) {
 		requirements := map[string]uint{
-			"milk":  500, // 500 мл молока
-			"flour": 250, // 250 г муки
+			"milk":  500,
+			"flour": 250,
 		}
 
 		shoppingList, err := service.CheckAvailability(ctx, requirements)

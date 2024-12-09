@@ -84,13 +84,13 @@ func (handler *Handler) checkProductsAvailability(w http.ResponseWriter, r *http
 			http.Error(w, "Invalid product_id in ingredients", http.StatusBadRequest)
 			return
 		}
-		
+
 		amount, ok := ingredient["amount"].(float64)
 		if !ok {
 			http.Error(w, "Invalid amount in ingredients", http.StatusBadRequest)
 			return
 		}
-		
+
 		requirements[productID] = uint(amount)
 	}
 

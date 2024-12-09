@@ -94,14 +94,14 @@ func TestHandler_checkProductsAvailability(t *testing.T) {
 			ID:              "овсяные_хлопья",
 			Name:            "Овсяные хлопья",
 			WeightPerPkg:    1000,
-			Amount:          1,
+			Amount:          1000,
 			PresentInFridge: true,
 		},
 		{
 			ID:              "молоко",
 			Name:            "Молоко",
 			WeightPerPkg:    1000,
-			Amount:          1,
+			Amount:          1000,
 			PresentInFridge: true,
 		},
 	}
@@ -116,11 +116,11 @@ func TestHandler_checkProductsAvailability(t *testing.T) {
 			},
 			"ingredients": []map[string]interface{}{
 				{
-					"amount":     100.0,
+					"amount":     100,
 					"product_id": "овсяные_хлопья",
 				},
 				{
-					"amount":     200.0,
+					"amount":     200,
 					"product_id": "молоко",
 				},
 			},
