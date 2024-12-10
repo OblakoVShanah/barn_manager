@@ -14,8 +14,9 @@ import (
 	"github.com/OblakoVShanah/barn_manager/internal/product/mysql"
 	// "github.com/OblakoVShanah/barn_manager/internal/product/memory"
 	"github.com/go-chi/chi/v5"
-	"github.com/jmoiron/sqlx"
 	_ "github.com/go-sql-driver/mysql" // драйвер mysql
+	"github.com/jmoiron/sqlx"
+
 	// _ "github.com/lib/pq" // драйвер postgres
 	"gopkg.in/yaml.v3"
 )
@@ -74,7 +75,8 @@ func New(ctx context.Context, config *Config) (*App, error) {
 // Setup инициализирует приложение
 func (a *App) Setup(ctx context.Context, dsn string) error {
 	// // Инициализация подключения к базе данных
-	db, err := sqlx.Connect("mysql", "barn_manager:barn_manager@tcp(localhost:3306)/barn?parseTime=true&loc=Local")
+	// db, err := sqlx.Connect("mysql", "barn_manager:barn_manager@tcp(localhost:3306)/barn?parseTime=true&loc=Local")
+	db, err := sqlx.ConnectContext(ctx, "mysql", dsn)
 	// db, err := sqlx.ConnectContext(ctx, "postgres", dsn)
 	if err != nil {
 		return fmt.Errorf("не удалось подключиться к базе данных: %w", err)

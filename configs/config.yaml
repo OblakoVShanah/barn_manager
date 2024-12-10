@@ -1,4 +1,4 @@
 host: "0.0.0.0"
-port: "8080"
+port: "8082"
 db:
-  dsn: "barn_manager:barn_manager@tcp(localhost:3306)/barn?parseTime=true&loc=Local"
+  dsn: "menu_manager:menu_manager@tcp(localhost:3306)/menu_test?parseTime=true&loc=Local"

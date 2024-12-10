@@ -66,40 +66,48 @@ func (handler *Handler) postProducts(w http.ResponseWriter, r *http.Request) {
 
 // checkProductsAvailability проверяет наличие необходимых продуктов
 func (handler *Handler) checkProductsAvailability(w http.ResponseWriter, r *http.Request) {
-	var recipe struct {
-		Steps       []string                   `json:"steps"`
-		Ingredients []map[string]interface{}   `json:"ingredients"`
+	var recipes []struct {
+		Steps       []string                 `json:"steps"`
+		Ingredients []map[string]interface{} `json:"ingredients"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
+	// Декодируем массив рецептов из тела запроса
+	if err := json.NewDecoder(r.Body).Decode(&recipes); err != nil {
 		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Convert ingredients to requirements map
+	// requirements будет содержать суммарные требования по продуктам
 	requirements := make(map[string]uint)
-	for _, ingredient := range recipe.Ingredients {
-		productID, ok := ingredient["product_id"].(string)
-		if !ok {
-			http.Error(w, "Invalid product_id in ingredients", http.StatusBadRequest)
-			return
-		}
 
-		amount, ok := ingredient["amount"].(float64)
-		if !ok {
-			http.Error(w, "Invalid amount in ingredients", http.StatusBadRequest)
-			return
-		}
+	// Пробегаемся по всем рецептам и их ингредиентам
+	for _, recipe := range recipes {
+		for _, ingredient := range recipe.Ingredients {
+			productID, ok := ingredient["product_id"].(string)
+			if !ok {
+				http.Error(w, "Invalid product_id in ingredients", http.StatusBadRequest)
+				return
+			}
 
-		requirements[productID] = uint(amount)
+			amount, ok := ingredient["amount"].(float64)
+			if !ok {
+				http.Error(w, "Invalid amount in ingredients", http.StatusBadRequest)
+				return
+			}
+
+			// Добавляем количество к общей карте требований
+			requirements[productID] += uint(amount)
+		}
 	}
 
+	// Проверяем доступность продуктов
 	shoppingList, err := handler.service.CheckAvailability(r.Context(), requirements)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// Кодируем результат в JSON
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(shoppingList); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

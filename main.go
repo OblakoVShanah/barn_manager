@@ -10,7 +10,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	config, err := app.NewConfig("config.yaml")
+	config, err := app.NewConfig("configs/config.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
