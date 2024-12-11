@@ -3,7 +3,9 @@ package product
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -76,6 +78,9 @@ func (handler *Handler) checkProductsAvailability(w http.ResponseWriter, r *http
 		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	log.Print(time.Now().String() + " -> ")
+	log.Println(recipes)
 
 	// requirements будет содержать суммарные требования по продуктам
 	requirements := make(map[string]uint)
