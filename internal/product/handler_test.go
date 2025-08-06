@@ -108,20 +108,22 @@ func TestHandler_checkProductsAvailability(t *testing.T) {
 	mockStore.SetProducts(testProducts)
 
 	t.Run("successful check", func(t *testing.T) {
-		recipe := map[string]interface{}{
-			"steps": []string{
-				"Вскипятить молоко",
-				"Добавить хлопья",
-				"Варить 5 минут",
-			},
-			"ingredients": []map[string]interface{}{
-				{
-					"amount":     100,
-					"product_id": "овсяные_хлопья",
+		recipe := []map[string]interface{}{
+			{
+				"steps": []string{
+					"Вскипятить молоко",
+					"Добавить хлопья",
+					"Варить 5 минут",
 				},
-				{
-					"amount":     200,
-					"product_id": "молоко",
+				"ingredients": []map[string]interface{}{
+					{
+						"amount":     100,
+						"product_id": "овсяные_хлопья",
+					},
+					{
+						"amount":     200,
+						"product_id": "молоко",
+					},
 				},
 			},
 		}
@@ -168,13 +170,15 @@ func TestHandler_checkProductsAvailability(t *testing.T) {
 	t.Run("service error", func(t *testing.T) {
 		mockStore.SetError(errors.New("database error"))
 
-		recipe := map[string]interface{}{
-			"steps": []string{"Step 1"},
-			"ingredients": []map[string]interface{}{
-				{
-					"unit":       "г",
-					"amount":     100.0,
-					"product_id": "овсяные_хлопья",
+		recipe := []map[string]interface{}{
+			{
+				"steps": []string{"Step 1"},
+				"ingredients": []map[string]interface{}{
+					{
+						"unit":       "г",
+						"amount":     100.0,
+						"product_id": "овсяные_хлопья",
+					},
 				},
 			},
 		}

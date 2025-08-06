@@ -7,19 +7,35 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// Storage представляет собой хранилище продуктов в MySQL базе данных
+// Storage represents a MySQL database storage for products.
+// It implements the Store interface and provides methods for saving and loading products.
 type Storage struct {
 	db *sqlx.DB
 }
 
-// NewStorage создает новый экземпляр хранилища продуктов
+// NewStorage creates a new instance of MySQL storage.
+// It initializes the storage with the provided database connection.
+//
+// Parameters:
+//   - db: The database connection to use
+//
+// Returns:
+//   - *Storage: The initialized storage
 func NewStorage(db *sqlx.DB) *Storage {
 	return &Storage{db: db}
 }
 
-// SaveProduct сохраняет продукт в базу данных.
-// Если продукт с таким ID уже существует, он будет обновлен.
-// Возвращает ID сохраненного продукта или ошибку.
+// SaveProduct saves a product to the database.
+// If a product with the same ID already exists, it will be updated with the new information.
+// The price is recalculated as a weighted average based on the existing and new amounts.
+//
+// Parameters:
+//   - ctx: Context for the operation
+//   - product: The product to be saved
+//
+// Returns:
+//   - string: The ID of the saved product
+//   - error: Any error that occurred during the operation
 func (s *Storage) SaveProduct(ctx context.Context, product product.FoodProduct) (string, error) {
 	query := `
 		INSERT INTO products (
@@ -31,8 +47,12 @@ func (s *Storage) SaveProduct(ctx context.Context, product product.FoodProduct) 
 			name = VALUES(name),
 			weight_per_pkg = VALUES(weight_per_pkg),
 			amount = amount + VALUES(amount),
-			price_per_pkg = (amount * price_per_pkg + VALUES(amount) * VALUES(price_per_pkg)) / (amount + VALUES(amount)),
-			expiration_date = least(VALUES(expiration_date), expiration_date),
+			price_per_pkg = CASE 
+				WHEN amount + VALUES(amount) > 0 
+				THEN (amount * price_per_pkg + VALUES(amount) * VALUES(price_per_pkg)) / (amount + VALUES(amount))
+				ELSE VALUES(price_per_pkg)
+			END,
+			expiration_date = LEAST(VALUES(expiration_date), expiration_date),
 			present_in_fridge = VALUES(present_in_fridge),
 			proteins = VALUES(proteins),
 			fats = VALUES(fats),
@@ -61,8 +81,15 @@ func (s *Storage) SaveProduct(ctx context.Context, product product.FoodProduct) 
 	return product.ID, nil
 }
 
-// LoadProducts загружает все продукты из базы данных.
-// Возвращает список продуктов, отсортированный по имени, или ошибку.
+// LoadProducts loads all products from the database.
+// It retrieves all products sorted by name and returns them as a slice.
+//
+// Parameters:
+//   - ctx: Context for the operation
+//
+// Returns:
+//   - []product.FoodProduct: List of all products
+//   - error: Any error that occurred during the operation
 func (s *Storage) LoadProducts(ctx context.Context) ([]product.FoodProduct, error) {
 	query := `
 		SELECT 

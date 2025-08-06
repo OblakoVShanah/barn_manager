@@ -21,16 +21,25 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Config представляет конфигурацию приложения
+// Config represents the application configuration structure.
+// It contains settings for the HTTP server and database connection.
 type Config struct {
-	Host string
-	Port string
+	Host string `yaml:"host"` // HTTP server host
+	Port string `yaml:"port"` // HTTP server port
 	DB   struct {
-		DSN string
-	}
+		DSN string `yaml:"dsn"` // Database connection string
+	} `yaml:"db"`
 }
 
-// NewConfig создает конфигурацию приложения из yaml файла
+// NewConfig creates a new application configuration from a YAML file.
+// It reads the configuration file from the specified path and unmarshals it into a Config struct.
+//
+// Parameters:
+//   - configPath: Path to the YAML configuration file
+//
+// Returns:
+//   - *Config: The parsed configuration
+//   - error: Any error that occurred during file reading or parsing
 func NewConfig(configPath string) (*Config, error) {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -46,14 +55,24 @@ func NewConfig(configPath string) (*Config, error) {
 	return config, nil
 }
 
-// App это структура приложения
+// App represents the main application structure.
+// It contains the HTTP server, router, and configuration.
 type App struct {
 	config *Config
 	router *chi.Mux
 	http   *http.Server
 }
 
-// New создает новое приложение
+// New creates a new application instance with the provided configuration.
+// It initializes the HTTP server with reasonable default timeouts and the Chi router.
+//
+// Parameters:
+//   - ctx: Context for the operation
+//   - config: Application configuration
+//
+// Returns:
+//   - *App: The initialized application
+//   - error: Any error that occurred during initialization
 func New(ctx context.Context, config *Config) (*App, error) {
 	r := chi.NewRouter()
 
@@ -72,7 +91,15 @@ func New(ctx context.Context, config *Config) (*App, error) {
 	}, nil
 }
 
-// Setup инициализирует приложение
+// Setup initializes the application components including database connection,
+// storage layer, service layer, and HTTP handlers.
+//
+// Parameters:
+//   - ctx: Context for the operation
+//   - dsn: Database connection string
+//
+// Returns:
+//   - error: Any error that occurred during setup
 func (a *App) Setup(ctx context.Context, dsn string) error {
 	// // Инициализация подключения к базе данных
 	// db, err := sqlx.Connect("mysql", "barn_manager:barn_manager@tcp(localhost:3306)/barn?parseTime=true&loc=Local")
@@ -102,7 +129,12 @@ func (a *App) Setup(ctx context.Context, dsn string) error {
 	return nil
 }
 
-// Start запускает приложение
+// Start runs the HTTP server with graceful shutdown handling.
+// It starts the server in a goroutine and waits for an interrupt signal.
+// When a signal is received, it gracefully shuts down the server.
+//
+// Returns:
+//   - error: Any error that occurred during server operation or shutdown
 func (a *App) Start() error {
 	// Создание контекста, который будет отменен при получении сигнала прерывания
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
