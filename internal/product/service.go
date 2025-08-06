@@ -8,17 +8,34 @@ import (
 	"github.com/OblakoVShanah/barn_manager/internal/oops"
 )
 
-// AppService реализует бизнес-логику работы с продуктами
+// AppService implements the business logic for product management operations.
+// It provides methods for retrieving available products, adding new products,
+// and checking product availability for recipes.
 type AppService struct {
 	storage Store
 }
 
-// NewService создает новый экземпляр сервиса
+// NewService creates a new instance of the product service.
+// It initializes the service with the provided storage implementation.
+//
+// Parameters:
+//   - storage: The storage implementation to use
+//
+// Returns:
+//   - Service: The initialized service
 func NewService(storage Store) Service {
 	return &AppService{storage: storage}
 }
 
-// AvailableProducts возвращает список всех доступных продуктов
+// AvailableProducts returns a list of all available products in the storage.
+// It retrieves all products that are currently in stock and not expired.
+//
+// Parameters:
+//   - ctx: Context for the operation
+//
+// Returns:
+//   - []FoodProduct: List of available products
+//   - error: Any error that occurred during the operation
 func (s *AppService) AvailableProducts(ctx context.Context) ([]FoodProduct, error) {
 	products, err := s.storage.LoadProducts(ctx)
 	if err != nil {
@@ -30,7 +47,17 @@ func (s *AppService) AvailableProducts(ctx context.Context) ([]FoodProduct, erro
 	return products, nil
 }
 
-// PlaceProduct добавляет новый продукт в хранилище
+// PlaceProduct adds a new product to the storage.
+// It validates the product data and stores it in the database.
+// If a product with the same ID already exists, it will be updated.
+//
+// Parameters:
+//   - ctx: Context for the operation
+//   - product: The product to be added
+//
+// Returns:
+//   - string: The ID of the saved product
+//   - error: Any error that occurred during the operation
 func (s *AppService) PlaceProduct(ctx context.Context, product FoodProduct) (id string, err error) {
 	// Проверка валидности продукта
 	if product.ID == "" || product.Name == "" || product.WeightPerPkg == 0 {
@@ -49,7 +76,17 @@ func (s *AppService) PlaceProduct(ctx context.Context, product FoodProduct) (id 
 	return id, nil
 }
 
-// CheckAvailability проверяет доступность продуктов для покупки
+// CheckAvailability checks the availability of products for cooking a dish.
+// It compares the required ingredients with available products and returns
+// a shopping list of missing or insufficient products.
+//
+// Parameters:
+//   - ctx: Context for the operation
+//   - requirements: Map of product IDs to required amounts
+//
+// Returns:
+//   - ShoppingList: List of products that need to be purchased
+//   - error: Any error that occurred during the operation
 func (s *AppService) CheckAvailability(ctx context.Context, requirements map[string]uint) (ShoppingList, error) {
 	// Получаем все доступные продукты
 	products, err := s.storage.LoadProducts(ctx)
@@ -80,8 +117,9 @@ func (s *AppService) CheckAvailability(ctx context.Context, requirements map[str
 		if availableProduct.Amount < requiredAmount {
 			// Если продукта недостаточно, добавляем недостающее количество в список покупок
 			neededAmount := requiredAmount - availableProduct.Amount
-			availableProduct.Amount = neededAmount
-			shoppingList.Products = append(shoppingList.Products, availableProduct)
+			productToAdd := availableProduct
+			productToAdd.Amount = neededAmount
+			shoppingList.Products = append(shoppingList.Products, productToAdd)
 		}
 	}
 
